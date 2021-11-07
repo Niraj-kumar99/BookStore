@@ -37,6 +37,8 @@ Route::group([
 
 
     Route::post('/addbook', [BookController::class, 'addBook']);
-    Route::post('/deletebook', [BookController::class, 'delete_BookId']);
+    Route::post('/deletebook', [BookController::class, 'deleteBookByBookId']);
+    Route::post('/updatebook', [BookController::class, 'updateBookByBookId']);
+    Route::get('/getbooks', [BookController::class, 'getAllBooks']);
 
 });
