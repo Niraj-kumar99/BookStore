@@ -6,6 +6,7 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\BookController;
 use App\Http\Controllers\ForgotPasswordController;
+use App\Http\Controllers\DocumentController;
 
 /*
 |--------------------------------------------------------------------------
@@ -32,13 +33,15 @@ Route::group([
     Route::post('/refresh', [AuthController::class, 'refreshUser']);
     Route::get('/user-profile', [AuthController::class, 'userProfile']);
 
-    Route::post('/forgotpassworduser', [ForgotPasswordController::class, 'forgotPasswordUser']);
-    Route::post('/forgotpasswordadmin', [ForgotPasswordController::class, 'forgotPasswordAdmin']);
-
+    Route::post('/forgotpassword', [ForgotPasswordController::class, 'forgotPasswordUser']);
+    
 
     Route::post('/addbook', [BookController::class, 'addBook']);
     Route::post('/deletebook', [BookController::class, 'deleteBookByBookId']);
     Route::post('/updatebook', [BookController::class, 'updateBookByBookId']);
     Route::get('/getbooks', [BookController::class, 'getAllBooks']);
+
+    Route::post('/deletebookimage', [BookController::class, 'deleteBookImage']);
+    
 
 });

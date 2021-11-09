@@ -6,6 +6,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Storage;
 use App\Models\Book;
 use App\Models\User;
 use JWTAuth;
@@ -23,7 +24,7 @@ class BookController extends Controller
             'Book_name' => 'required|string|between:2,100',
             'Book_Description' => 'required|string|between:5,2000',
             'Book_Author' => 'required|string|between:5,300',
-            'Book_Image' => 'required|string|between:5,800',
+            'Book_Image' => 'required|image|mimes:jpeg,png,jpg,gif,svg|max:2048',
             'Price' => 'required',
             'Quantity' => 'required',
             ]);
@@ -34,8 +35,8 @@ class BookController extends Controller
             return response()->json($validator->errors()->toJson(), 400);
         }
 
-        try
-        {
+        //try
+        //{
             $currentUser = JWTAuth::parseToken()->authenticate();
 
             if ($currentUser)
@@ -59,25 +60,28 @@ class BookController extends Controller
                     'message' => 'Book is already in store......'
                 ],401);
             }
+            $imageName = time().'.'.$request->Book_Image->extension();  
+            $path = Storage::disk('s3')->put('images', $request->Book_Image);
+            $pathurl = Storage::disk('s3')->url($path);
             //if the book is not is store then add it..
             $book = new Book;
             $book->Book_name = $request->input('Book_name');
             $book->Book_Description = $request->input('Book_Description');
             $book->Book_Author = $request->input('Book_Author');
-            $book->Book_Image = $request->input('Book_Image');
+            $book->Book_Image = $pathurl;
             $book->Price = $request->input('Price');
             $book->Quantity = $request->input('Quantity');
             $book->user_id = $currentUser->id;
             $book->save();
             
-        }
-        catch(Exception $e) 
-        {
-            Log::info('book creation failed',['user_id'=>$currentUser,'book_id'=>$request->id]);
-            return response()->json([
-                'message' => 'Something went wrong ... Check Bearer Token..'
-            ],201);
-        }
+        //}
+        //catch(Exception $e) 
+        //{
+            //Log::info('book creation failed');
+            //return response()->json([
+                //'message' => 'Something went wrong ... Check Bearer Token..'
+            //],201);
+        //}
         Log::info('book created',['user_id'=>$currentUser,'book_id'=>$request->id]);
             return response()->json([
                 'message' => ' Created.......'
@@ -85,6 +89,7 @@ class BookController extends Controller
             
     }
 
+    /*
     public function deleteBookByBookId(Request $request) {
         $validator = Validator::make($request->all(), [
             'id' => 'required',
@@ -122,14 +127,14 @@ class BookController extends Controller
             ],400);
         }
 
-        if($books->delete())
-        {
+        if($books->delete());
+        {    
             Log::info('book deleted',['admin_id'=>$currentUser,'book_id'=>$request->id]);
             return response()->json([
                 'message' => ' deleted'
             ],201);
         }
-    }
+    }*/
 
     
     public function updateBookByBookId(Request $request) {
@@ -138,7 +143,7 @@ class BookController extends Controller
             'Book_name' => 'required|string|between:2,100',
             'Book_Description' => 'required|string|between:5,2000',
             'Book_Author' => 'required|string|between:5,300',
-            'Book_Image' => 'required|string|between:5,800',
+            'Book_Image' => 'required|image|mimes:jpeg,png,jpg,gif,svg|max:2048',
             'Price' => 'required',
         ]);
         if($validator->fails())
@@ -170,13 +175,32 @@ class BookController extends Controller
                     'message' => 'Book not Found'
                 ], 404);
             }
+            
+            if($request->Book_Image)
+            {
+                $path = str_replace(env('AWS_URL_PATH'),'',$book->Book_Image);
+            
+                if(Storage::disk('s3')->exists($path)) {
+                    Storage::disk('s3')->delete($path);
+                }
+                $path = Storage::disk('s3')->put('images', $request->Book_Image);
+                $pathurl = Storage::disk('s3')->url($path);
+                $book->Book_Image = $pathurl;
+                }
+            
+                /*
+            if($request->Book_Image)
+            {
+                $path = Storage::disk('s3')->put('images', $request->Book_Image);
+                $pathurl = Storage::disk('s3')->url($path);
+                $book->Book_Image = $pathurl;
+            }*/
 
-            $book->fill($request->all());
-
+            $book->fill($request->except('Book_Image'));
             if($book->save())
             {
                 return response()->json([
-                    'message' => 'Book updated Sucessfully'
+                    'message' => 'Book updation Done....'
                 ], 201);
             }
         }
@@ -251,4 +275,51 @@ class BookController extends Controller
         ], 201);
     }
 
+    public function deleteBookByBookId(Request $request)
+    {
+        $validator = Validator::make($request->all(), [
+            'id' => 'required',
+        ]);
+
+        if($validator->fails())
+        {
+            return response()->json($validator->errors()->toJson(), 400);
+        }
+        try
+        {
+            $currentAdmin = JWTAuth::parseToken()->authenticate();
+            
+            $admin = User::select('id')->where([
+                ['usertype','=','admin'],
+                ['id','=',$currentAdmin->id]
+            ])->get();
+                
+            if(count($admin)==0)
+            {
+                return response()->json(['message' => 'Unauthorised'], 403);
+            }
+
+            $book_id = Book::find($request->id);
+
+            if(!$book_id)
+            {
+                return response()->json(['message' => 'Book not Found'], 404);
+            }
+
+            $path = str_replace(env('AWS_URL_PATH'),'',$book_id->Book_Image);
+            
+            if(Storage::disk('s3')->exists($path)) {
+                Storage::disk('s3')->delete($path);
+                if($book_id->delete())
+                {
+                    return response()->json(['message' => 'Book deleted Sucessfully'], 201);
+                }
+            }
+            return response()->json(['message' => 'File image was not deleted'], 402);   
+        }
+        catch(Exception $e)
+        {
+            return response()->json(['message' => 'Invalid authorization token' ], 404);
+        }
+    }
 }
