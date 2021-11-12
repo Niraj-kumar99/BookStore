@@ -5,6 +5,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\BookController;
+use App\Http\Controllers\CartController;
 use App\Http\Controllers\ForgotPasswordController;
 use App\Http\Controllers\DocumentController;
 
@@ -41,7 +42,11 @@ Route::group([
     Route::post('/updatebook', [BookController::class, 'updateBookByBookId']);
     Route::get('/getbooks', [BookController::class, 'getAllBooks']);
 
-    Route::post('/deletebookimage', [BookController::class, 'deleteBookImage']);
+    Route::post('/addtocart', [CartController::class, 'addBookToCartByBookId']);
+    Route::post('/deletefromcart', [CartController::class, 'deleteBookByCartId']);
+    Route::post('/getfromcart', [CartController::class, 'getAllBooksFromCart']);
+    Route::post('/updatecart', [CartController::class, 'updateBookQuantityInCart']);
+
     
 
 });
