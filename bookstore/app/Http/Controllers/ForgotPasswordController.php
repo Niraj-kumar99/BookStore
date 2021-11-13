@@ -4,11 +4,12 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Models\User;
-use App\Models\Admin;
 use App\Models\PasswordReset;
 use App\Http\Requests\SendEmailRequest;
 use Tymon\JWTAuth\Facades\JWTAuth;
 use Validator;
+use Illuminate\Support\Facades\Log;
+
 
 class ForgotPasswordController extends Controller
 {
@@ -55,40 +56,48 @@ class ForgotPasswordController extends Controller
 
     }
 
-    public function forgotPasswordAdmin(Request $request)
+    public function resetPassword(Request $request)
     {
-        $validator = Validator::make($request->all(), [
-            'email' => 'required|string|email|max:100',
+        $validate = Validator::make($request->all(), [
+            'new_password' => 'min:6|required|',
+            'confirm_password' => 'required|same:new_password'
         ]);
-        if($validator->fails()){
-            return response()->json($validator->errors()->toJson(), 400);
-        }
 
-        $admin = Admin::where('email', $request->email)->first();
-
-        if (!$admin)
+        if ($validate->fails())
         {
             return response()->json([
-                'message' => 'can not find the email address'
-            ],404);
+                 'message' => "Password doesn't match"
+                ],400);
         }
         
-        $passwordReset = PasswordReset::updateOrCreate(
-            ['email' => $admin->email],
+        $passwordReset = PasswordReset::where('token', $request->token)->first();
 
-            [
-                'email' => $admin->email,
-                'token' => JWTAuth::fromUser($admin)
-            ]
-        );
-        
-        if ($admin && $passwordReset) 
+
+        if (!$passwordReset) 
         {
-            $sendEmail = new SendEmailRequest();
-            $sendEmail->sendMail($admin->email,$passwordReset->token);
+            return response()->json(['message' => 'This token is invalid'],401);
         }
 
-        return response()->json(['message' => 'password reset link genereted in mail'],205);
+        $user = User::where('email', $passwordReset->email)->first();
 
+        if (!$user)
+        {
+            Log::error('Email not found.', ['id' => $request->email]);
+            return response()->json([
+                'message' => "we can't find the user with that e-mail address"
+            ], 400);
+        }
+        else
+        {
+            $user->password = bcrypt($request->new_password);
+            $user->save();
+            $passwordReset->delete();
+            Log::info('Reset Successful : '.'Email Id :'.$request->email );
+            
+            return response()->json([
+                'status' => 201, 
+                'message' => 'Password reset successfull!'
+            ],201);
+        }
     }
 }

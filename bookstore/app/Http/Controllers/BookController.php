@@ -187,14 +187,6 @@ class BookController extends Controller
                 $pathurl = Storage::disk('s3')->url($path);
                 $book->Book_Image = $pathurl;
                 }
-            
-                /*
-            if($request->Book_Image)
-            {
-                $path = Storage::disk('s3')->put('images', $request->Book_Image);
-                $pathurl = Storage::disk('s3')->url($path);
-                $book->Book_Image = $pathurl;
-            }*/
 
             $book->fill($request->except('Book_Image'));
             if($book->save())

@@ -6,6 +6,7 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\BookController;
 use App\Http\Controllers\CartController;
+use App\Http\Controllers\AddressController;
 use App\Http\Controllers\ForgotPasswordController;
 use App\Http\Controllers\DocumentController;
 
@@ -35,6 +36,7 @@ Route::group([
     Route::get('/user-profile', [AuthController::class, 'userProfile']);
 
     Route::post('/forgotpassword', [ForgotPasswordController::class, 'forgotPasswordUser']);
+    Route::post('/resetPassword', [ForgotPasswordController::class, 'resetPassword']);
     
 
     Route::post('/addbook', [BookController::class, 'addBook']);
@@ -47,6 +49,9 @@ Route::group([
     Route::post('/getfromcart', [CartController::class, 'getAllBooksFromCart']);
     Route::post('/updatecart', [CartController::class, 'updateBookQuantityInCart']);
 
+    Route::post('/addAddress', [AddressController::class, 'addAddress']); 
+    Route::post('/deleteAddress', [AddressController::class, 'deleteAddress']);
+    Route::post('/changeAddress', [AddressController::class, 'changeAddress']);
+    Route::get('/getAddress', [AddressController::class, 'getAddress']);
     
-
 });
