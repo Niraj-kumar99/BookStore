@@ -54,13 +54,58 @@ class SendEmailRequest
     }
 
 
-
-/*
-public function sendEmailToCollab($email,$data,$currentUserfirstName,$currentUserlastName,$currentUserEmail)
+    public function sendEmailToUser($email,$data,$Total_Price)
     {
-        $subject = 'Sharing a note to you:';
+        $name = 'bookstore';
+        $email = $email;
+        $subject = 'Your Order Summary';
+        $data ="Hurray!!!!your order is confirmed and the order summary is : <br>".$data ."<br>Total Payment :".$Total_Price;
+        
+          
+        require '..\vendor\autoload.php';
+        $mail = new PHPMailer(true);
 
-        $data = $currentUserfirstName.' '.$currentUserlastName.' '.$currentUserEmail.' shared a note to you <br>'.$data;
+        try
+        {                                       
+            $mail->isSMTP();                                          
+            $mail->Host       = 'smtp.gmail.com';                        
+            $mail->SMTPAuth   = true;                                  
+            $mail->Username   = 'kumarnkj35@gmail.com';                  
+            $mail->Password   = 'hiniraj35166';                              
+            $mail->SMTPSecure = 'tls'; 
+            $mail->Port       = 587;
+            $mail->setFrom('kumarnkj35@gmail.com', 'niraj'); 
+            $mail->addAddress($email,$name);
+            $mail->isHTML(true);  
+            $mail->Subject =  $subject;
+            $mail->Body    = $data;
+            $dt = $mail->send();
+
+            if($dt)
+            {
+                return true;
+            } 
+            else
+            {
+                return false;
+            } 
+
+        }
+        catch (Exception $e) 
+        {
+            return back()->with('error','Message could not be sent.');
+
+        }
+    }
+
+
+
+
+/*public function sendEmailToUser($email,$data,$currentUserEmail)
+    {
+        $subject = 'Order Summary';
+
+        $data = 'Your Order Summary... <br>'.$data;
         //$name = $Touser_namefirstname;  //-------
         $email = $email;
         $subject = 'Sharing a note to you:';
@@ -93,7 +138,7 @@ public function sendEmailToCollab($email,$data,$currentUserfirstName,$currentUse
         {
             return back()->with('error','Message could not be sent.');
         }
-    }
-    */
+    }*/
+    
 
 }

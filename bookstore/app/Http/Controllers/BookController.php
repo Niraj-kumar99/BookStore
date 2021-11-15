@@ -4,8 +4,6 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
-use Illuminate\Support\Facades\Cache;
-use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 use App\Models\Book;
 use App\Models\User;
@@ -89,54 +87,6 @@ class BookController extends Controller
             
     }
 
-    /*
-    public function deleteBookByBookId(Request $request) {
-        $validator = Validator::make($request->all(), [
-            'id' => 'required',
-        ]);
-        if($validator->fails())
-        {
-            Log::info('bookId is a required field');
-            return response()->json($validator->errors()->toJson(), 404);
-        }
-
-        $id = $request->input('id');
-        $currentUser = JWTAuth::parseToken()->authenticate();
-
-        if ($currentUser)
-            {
-                $user_id = User::select('id')
-                    ->where([['usertype','=','admin'],['id','=',$currentUser->id]])
-                    ->get();
-            }
-
-        if(count($user_id)==0)
-        {
-            return response()->json([
-                'message' => 'You are not a ADMIN....'
-            ],404);
-        }
-
-        $books = $currentUser->books()->find($id);
-
-        if(!$books)
-        {
-            Log::info('book you are searching is not present for deletion..');
-            return response()->json([
-                'message' => 'no book found'
-            ],400);
-        }
-
-        if($books->delete());
-        {    
-            Log::info('book deleted',['admin_id'=>$currentUser,'book_id'=>$request->id]);
-            return response()->json([
-                'message' => ' deleted'
-            ],201);
-        }
-    }*/
-
-    
     public function updateBookByBookId(Request $request) {
         $validator = Validator::make($request->all(), [
             'id' => 'required',
@@ -313,5 +263,80 @@ class BookController extends Controller
         {
             return response()->json(['message' => 'Invalid authorization token' ], 404);
         }
+    }
+
+    public function searchEnteredKeyWord(Request $request)
+    {
+        $validator = Validator::make($request->all(),[
+            'search' => 'required|string'
+        ]);
+
+        if($validator->fails())
+        {
+            return response()->json($validator->errors()->toJson(), 400);
+        }
+
+        $searchKey = $request->input('search');
+        $currentUser = JWTAuth::parseToken()->authenticate();
+
+        if ($currentUser) 
+        {
+            $userbooks = Book::leftJoin('carts', 'carts.book_id', '=', 'books.id')
+            ->select('books.id','books.Book_name','books.Book_Description','books.Book_Author','books.Book_Image','books.Price','books.Quantity')
+            ->Where('books.Book_name', 'like','%'.$searchKey.'%')
+            ->orWhere('books.Book_Description', 'like','%'.$searchKey.'%')
+            ->orWhere('books.Book_Author', 'like','%'.$searchKey.'%')
+            ->orWhere('books.Price', 'like','%'.$searchKey.'%')
+            ->get();
+
+            if ($userbooks == '[]')
+            {
+                return response()->json(['message' => 'No results'], 404); 
+            }
+            return response()->json([
+                'message' => 'Serch done Successfully',
+                'books' => $userbooks
+            ], 201);   
+        }
+        return response()->json(['message' => 'Invalid authorisation token'],403);
+    }
+
+    //Ascending order...
+    public function sortOnPriceLowToHigh() {
+
+        $currentUser = JWTAuth::parseToken()->authenticate();
+
+        if ($currentUser)
+        {
+            $book = Book::orderBy('books.Price')
+                ->get();
+        }
+        if($book=='[]')
+        {
+            return response()->json(['message' => 'Books not found'], 404);
+        }
+        return response()->json([
+            'books' => $book,
+            'message' => 'These much books are in store .....'
+        ], 201);
+    }
+    //Descending order
+    public function sortOnPriceHighToLow() {
+
+        $currentUser = JWTAuth::parseToken()->authenticate();
+
+        if ($currentUser)
+        {
+            $book = Book::orderBy('books.Price', 'desc')
+                ->get();
+        }
+        if($book=='[]')
+        {
+            return response()->json(['message' => 'Books not found'], 404);
+        }
+        return response()->json([
+            'books' => $book,
+            'message' => 'These much books are in store .....'
+        ], 201);
     }
 }

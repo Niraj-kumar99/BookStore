@@ -9,6 +9,7 @@ use App\Http\Controllers\CartController;
 use App\Http\Controllers\AddressController;
 use App\Http\Controllers\ForgotPasswordController;
 use App\Http\Controllers\DocumentController;
+use App\Http\Controllers\OrderController;
 
 /*
 |--------------------------------------------------------------------------
@@ -43,6 +44,10 @@ Route::group([
     Route::post('/deletebook', [BookController::class, 'deleteBookByBookId']);
     Route::post('/updatebook', [BookController::class, 'updateBookByBookId']);
     Route::get('/getbooks', [BookController::class, 'getAllBooks']);
+    Route::get('/searchbooks', [BookController::class, 'searchEnteredKeyWord']);
+    Route::get('/sortlowtohigh', [BookController::class, 'sortOnPriceLowToHigh']);
+    Route::get('/sorthightolow', [BookController::class, 'sortOnPriceHighToLow']);
+
 
     Route::post('/addtocart', [CartController::class, 'addBookToCartByBookId']);
     Route::post('/deletefromcart', [CartController::class, 'deleteBookByCartId']);
@@ -52,6 +57,10 @@ Route::group([
     Route::post('/addAddress', [AddressController::class, 'addAddress']); 
     Route::post('/deleteAddress', [AddressController::class, 'deleteAddress']);
     Route::post('/changeAddress', [AddressController::class, 'changeAddress']);
-    Route::get('/getAddress', [AddressController::class, 'getAddress']);
+    Route::get('/getAddress', [AddressController::class, 'getAddress']); 
+
+
+    Route::post('/placeorder', [OrderController::class, 'placeOrder']);
+    Route::post('/sendmail', [OrderController::class, 'sendMailToUserWithOrderId']);
     
 });
