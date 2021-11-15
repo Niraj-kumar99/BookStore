@@ -15,6 +15,13 @@ use Validator;
 
 class BookController extends Controller
 {
+    /*
+     * Function add a new book with  
+     * proper Book_name, Book_Description, Book_Author, Book_Image 
+     * Book_Image will be stored in aws S3 bucket and bucket will generate 
+     * a image link and that link will be stored in mysql database and admin bearer token
+     * must be passed because only admin can add or remove books .
+    */
     public function addBook(Request $request) {
 
         $validator = Validator::make($request->all(), [
@@ -337,6 +344,16 @@ class BookController extends Controller
         return response()->json([
             'books' => $book,
             'message' => 'These much books are in store .....'
+        ], 201);
+    }
+
+    public function paginationBook()
+    {
+        $allBooks = Book::paginate(5); 
+
+        return response()->json([
+            'message' => 'Pagination aplied to all Books',
+            'books' =>  $allBooks,
         ], 201);
     }
 }

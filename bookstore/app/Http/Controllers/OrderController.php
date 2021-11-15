@@ -47,29 +47,37 @@ class OrderController extends Controller
                 ->where([['books.Book_name', '=', $request->input('Book_name')]])
                 ->value('id');
 
-            //get userID
-            $get_userid = User::select('id')->where([
-                ['id','=',$currentUser->id]
-            ])->get();
-
             //getting addressID
             $get_addressid = Address::select('id')
                 ->where([['user_id', '=', $currentUser->id]])
                 ->value('id');
 
+            //get book name..    
+            $get_BookName = Book::select('Book_name')
+                ->where('Book_name', '=', $request->input('Book_name'))
+                ->value('Book_name');
+
+            //get book author ...
+            $get_BookAuthor = Book::select('Book_Author')
+                ->where('Book_name', '=', $request->input('Book_name'))
+                ->value('Book_Author');
+
+            //get book price
             $get_price = Book::select('Price')
                 ->where([['books.Book_name', '=', $request->input('Book_name')]])
                 ->value('Price');
-
+            //calculate total price
             $total_price = $request->input('Quantity') * $get_price;
+
 
             //echo $get_book;
             //echo $get_quantity;
             //echo $get_bookid;
-            //echo $get_userid;
             //echo $get_addressid;
             //echo $get_price;
             //echo $total_price;
+            //echo $get_BookName;
+            //echo $get_BookAuthor;
             
             $order = Order::create([
                 'user_id' => $currentUser->id,
@@ -79,11 +87,11 @@ class OrderController extends Controller
             ]); 
             
             $sendEmail = new SendEmailRequest();
-            $sendEmail->sendEmailToUser($currentUser->email,$order,$total_price);
+            $sendEmail->sendEmailToUser($currentUser->email,$order->order_id,$get_BookName,$get_BookAuthor,$request->input('Quantity'),$total_price);
             
             return response()->json([
                 'message' => 'Order Successfully Placed...',
-                'order' => $order,
+                'OrderId' => $order->order_id,
                 'Total_Price' => $total_price,
                 'message1' => 'Mail also sent to the user....',
             ], 201); 
@@ -94,7 +102,7 @@ class OrderController extends Controller
         ], 201);
     }
 
-
+    
     //get unique orderId...
     public function generateUniqueOrderId()
     {

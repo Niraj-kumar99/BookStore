@@ -48,6 +48,8 @@ Route::group([
     Route::get('/sortlowtohigh', [BookController::class, 'sortOnPriceLowToHigh']);
     Route::get('/sorthightolow', [BookController::class, 'sortOnPriceHighToLow']);
 
+    Route::get('/pagination', [BookController::class, 'paginationBook']);
+
 
     Route::post('/addtocart', [CartController::class, 'addBookToCartByBookId']);
     Route::post('/deletefromcart', [CartController::class, 'deleteBookByCartId']);
@@ -61,6 +63,6 @@ Route::group([
 
 
     Route::post('/placeorder', [OrderController::class, 'placeOrder']);
-    Route::post('/sendmail', [OrderController::class, 'sendMailToUserWithOrderId']);
+    
     
 });

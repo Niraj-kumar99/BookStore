@@ -54,12 +54,13 @@ class SendEmailRequest
     }
 
 
-    public function sendEmailToUser($email,$data,$Total_Price)
+    public function sendEmailToUser($email,$data,$bookname,$get_BookAuthor,$Quantity,$Total_Price)
     {
         $name = 'bookstore';
         $email = $email;
         $subject = 'Your Order Summary';
-        $data ="Hurray!!!!your order is confirmed and the order summary is : <br>".$data ."<br>Total Payment :".$Total_Price;
+        $data ="Hurray!!!!your order is confirmed and the order summary is : <br>"."Order_Id:".$data ."<br>Book Name :".$bookname."<br>Book Author :".$get_BookAuthor."<br>Book Quantity :".$Quantity."<br>Total Payment :".$Total_Price;
+                
         
           
         require '..\vendor\autoload.php';
