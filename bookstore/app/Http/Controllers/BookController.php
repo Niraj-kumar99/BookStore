@@ -93,7 +93,12 @@ class BookController extends Controller
             ],201);
             
     }
-
+    /*
+     *Function can takes column fom
+     *Bookid , Book_name , Book_Description, Book_Description,
+     *Book_Author, Book_Image, Book_Image
+     *and fetches the old note and updates with new one .
+    */
     public function updateBookByBookId(Request $request) {
         $validator = Validator::make($request->all(), [
             'id' => 'required',
@@ -162,6 +167,11 @@ class BookController extends Controller
     
     }
 
+    /*
+     *Function takes perticular Bookid and a Quantity value
+     *valid Authentication token as an input and fetch the book stock 
+     *and performs delete operation on that perticular note .
+    */
     public function addStockByBookId(Request $request) {
         $validator = Validator::make($request->all(), [
             'id'=>'required',
@@ -210,6 +220,9 @@ class BookController extends Controller
         }
     }
 
+    /*
+     *Function returns all the added books in the store .
+    */
     public function getAllBooks() {
         $book = Book::all();
         if($book==[])
@@ -224,6 +237,11 @@ class BookController extends Controller
         ], 201);
     }
 
+    /*
+     *Function takes perticular Bookid and a 
+     *valid Authentication token as an input and fetch the book 
+     *an performs delete operation on that perticular note .
+    */
     public function deleteBookByBookId(Request $request)
     {
         $validator = Validator::make($request->all(), [
@@ -272,6 +290,11 @@ class BookController extends Controller
         }
     }
 
+    /*
+     *Function takes a keyword given by the user 
+     *valid Authentication token as an input and fetch the book 
+     *an performs delete operation on that perticular note .
+    */
     public function searchEnteredKeyWord(Request $request)
     {
         $validator = Validator::make($request->all(),[
